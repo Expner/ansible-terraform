@@ -1,0 +1,30 @@
+BASTION:
+  hosts:
+    bastion:
+      ansible_host: bastion.kds4wexp.ru
+#bastion.kds4wexp.ru
+
+GITLAB:
+  hosts:
+    gitlab:
+      ansible_host: gitlab-host.kds4wexp.ru
+
+K8S:
+  hosts:
+    node-0:
+      ansible_host: node-0.kds4wexp.ru
+
+    node-1:
+      ansible_host: node-1.kds4wexp.ru
+
+    node-2:
+      ansible_host: node-2.kds4wexp.ru
+
+    node-3:
+      ansible_host: node-3.kds4wexp.ru
+
+    node-4:
+      ansible_host: node-4.kds4wexp.ru
+
+    node-5:
+      ansible_host: node-5.kds4wexp.ru

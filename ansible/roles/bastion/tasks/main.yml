@@ -1,0 +1,36 @@
+---
+- name: Gather facts from gitlab
+  ansible.builtin.setup:
+  delegate_to: gitlab
+  delegate_facts: true
+
+- name: Copy systemd iptables
+  copy:
+    src: restore-iptables-rules.service
+    dest: /etc/systemd/system/
+
+- name: Copy iptablesdown
+  copy:
+    src: iptablesdown
+    dest: /etc/network/if-post-down.d/
+
+- name: Enable restore-iptables-rules.service
+  systemd:
+    name: restore-iptables-rules.service
+    enabled: yes
+
+- name: Give permission to the iptablesdown
+  file:
+    path: /etc/network/if-post-down.d/iptablesdown
+    mode: +x
+
+- name: Configure iptables PREROUTING
+  iptables:
+    table: nat
+    chain: PREROUTING
+    protocol: tcp
+    destination_port: 443
+    jump: DNAT
+    to_destination: "{{ hostvars['gitlab']['ansible_facts']['eth0']['ipv4']['address'] }}:443"
+
+  notify: Save iptables

@@ -1,0 +1,7 @@
+ansible_user           : ubuntu
+#ansible_ssh_extra_args : "-o StrictHostKeyChecking=no -p 22 -J ubuntu@bastion.kds4wexp.ru"
+#ubuntu@bastion.kds4wexp.ru
+ansible_ssh_common_args: >
+  -o ProxyCommand="ssh -W %h:%p ubuntu@bastion.kds4wexp.ru"
+  -o ForwardAgent=yes
+  -o StrictHostKeyChecking=no

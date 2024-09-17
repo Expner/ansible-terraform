@@ -1,0 +1,12 @@
+---
+- hosts: bastion
+  become: true
+  gather_facts: true
+  roles:
+  - bastion
+
+- hosts: gitlab
+  become: true
+  gather_facts: true
+  roles:
+  - gitlab

@@ -1,0 +1,78 @@
+---
+- name: Installing dependencies
+  package: name={{ item }} state=present
+  with_items:
+    - ca-certificates
+    - openssh-server
+    - tzdata
+    - perl
+    - curl
+
+- name: Create dir for scripts
+  file: path=/scripts mode=0555 state=directory
+
+- name: Create dir for ssl
+  file: path=/etc/gitlab/ssl mode=0755 state=directory
+
+- name: Install gitlab-ce-script.deb.sh
+  copy: src=gitlab-ce-script.deb.sh dest=/scripts
+
+# сделать проверку
+- name: Execute gitlab-ce-script.deb.sh
+  script:
+    chdir: /scripts
+    cmd: gitlab-ce-script.deb.sh
+
+- name: Install gitlab-ce
+  apt: name=gitlab-ce state=latest
+
+- name: Update configuration gitlab
+  copy:
+    src: gitlab.rb
+    dest: /etc/gitlab/gitlab.rb
+
+#!!!
+- name: Get IAM-token
+  uri:
+    body_format: json
+    body:
+        yandexPassportOauthToken: "{{ OAuth }}"
+    url: https://iam.api.cloud.yandex.net/iam/v1/tokens
+    method: POST
+  register: IAM
+
+- name: List certificates
+  uri:
+    body_format: json
+    body:
+      folderId: "{{ folderId }}"
+    headers:
+       Authorization: Bearer {{ IAM.json.iamToken }}
+    url: https://certificate-manager.api.cloud.yandex.net/certificate-manager/v1/certificates
+    method: GET
+  register: CertData
+
+- name: Get ssl data
+  loop: "{{ CertData | community.general.json_query('json.certificates[?name==`kds4wexp-cert`].id')}}"
+  uri:
+    body_format: json
+    body:
+      certificateId: "{{ item }}"
+    headers:
+       Authorization: Bearer {{ IAM.json.iamToken }}
+    url: https://data.certificate-manager.api.cloud.yandex.net/certificate-manager/v1/certificates/{{ item }}:getContent
+    method: GET
+  register: CertContent
+
+- name: Add kds4wexp.ru.key
+  copy:
+    content: "{{ CertContent.results.0.json.certificateChain }}"
+    force: true
+    dest: /etc/gitlab/ssl/kds4wexp.ru.key
+
+- name: Add kds4wexp.ru.crt
+  copy:
+    content: "{{ CertContent.results.0.json.privateKey }}"
+    force: true
+    dest: /etc/gitlab/ssl/kds4wexp.ru.crt
+# приделать handlers

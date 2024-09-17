@@ -1,0 +1,7 @@
+.terraform.lock.hcl
+.terraform.tfstate.lock.info
+terraform/.terraform
+terraform.tfstate.backup
+terraform.tfstate
+/terraform_*/terraform.tfvars
+/ansible/roles/gitlab/vars

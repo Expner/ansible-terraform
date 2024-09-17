@@ -1,0 +1,9 @@
+[Unit]
+Description = Apply iptables rules
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'iptables-restore < /etc/iptables.rules'
+
+[Install]
+WantedBy=network-pre.target
